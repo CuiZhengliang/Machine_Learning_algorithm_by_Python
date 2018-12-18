@@ -1,6 +1,6 @@
 # -- encoding:utf-8 --
 """
-Created by CZL on 2018/12/17
+Created by CZL on 2018/12/18
 """
 
 import numpy as np
@@ -33,34 +33,39 @@ for i, d in enumerate(fd.values):  # enumerate生成一列索 引i,d为其元素
     data[i] = list(d)
 # 分割数据
 x, y = np.split(data, (13,), axis=1)
-y = y.ravel()  # 转换格式 拉直操作
-ly = len(y)
+# y = y.ravel()  # 转换格式 拉直操作
+# ly = len(y)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=12)
-# print("训练数据X的格式:{}, 以及类型:{}".format(x_train.shape, type(x_train)))
-# print("测试数据X的格式:{}".format(x_test.shape))
-# print("训练数据Y的格式:{}, 以及类型:{}".format(y_train.shape, type(y_train)))
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
 
-# 构建LinearRegression Model(根据数据情况需要转换为numpy矩阵格式)
-def lir_fit(x_train_, y_train_):
-    x_mat = np.mat(x_train_)
-    y_mat = np.mat(y_train_).reshape(-1, 1)
-    return (x_mat.T * x_mat).I * x_mat.T * y_mat
+# 构建构建LinearRegression Model base on Polynomial
+def lir_pl_fit(x_arr, y_arr):
+    x_mat = np.mat(x_arr)
+    y_mat = np.mat(y_arr)
+
+    xtx = x_mat.T * x_mat
+    if np.linalg.det(xtx) == 0:
+        print("Error!")
+        return
+    theta = xtx.I * (x_mat.T * y_mat)
+    return theta
 
 
-def predict_lir(x_):
-    return np.mat(x_) * theta
+def lir_pl_predict(x_arr, theta):
+    x_mat = np.mat(x_arr)
+    return x_mat * theta
 
 
-theta = lir_fit(x_train, y_train)
-p = predict_lir(x_test)
+theta_ = lir_pl_fit(x_train, y_train)
+y_p = lir_pl_predict(x_test, theta_)
 
+# 画图
 t = np.arange(len(x_test))
 plt.figure(facecolor='w')
 plt.plot(t, y_test, 'r-', label=u'y_test真实值')
-plt.plot(t, p, 'b-', label=u'x_test预测值')
-plt.title('DIY LinearRegression')
+plt.plot(t, y_p, 'b-', label=u'x_test预测值')
+plt.title('DIY LinearRegressionPolynomial')
 plt.legend(loc='upper right')
 plt.show()
 
@@ -70,7 +75,7 @@ def score_reg(test_y, predict_y):
     r2 = 1 - mse / np.var(test_y)
     print("MSE:", mse)
     print("R2:", r2)
-    print("theta:", theta)
+    print("theta:", theta_)
 
 
-score_reg(y_test, p)
+score_reg(y_test, y_p)
