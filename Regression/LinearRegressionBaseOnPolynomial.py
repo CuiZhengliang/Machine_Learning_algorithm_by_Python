@@ -1,6 +1,7 @@
 # -- encoding:utf-8 --
 """
 Created by CZL on 2018/12/18
+基于多项式，并不是基于sklearn的Poly数据清洗
 """
 
 import numpy as np
